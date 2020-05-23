@@ -1,23 +1,47 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	console.log("code-finder loaded");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "code-finder" is now active!');
+	let provider = vscode.languages.registerCompletionItemProvider("plaintext", {
+    provideCompletionItems(
+      document: vscode.TextDocument,
+      position: vscode.Position,
+      token: vscode.CancellationToken,
+      context: vscode.CompletionContext
+    ) {
+    	const imports = [
+        	["numpy", "np"],
+        	["pandas", "pd"],
+        	["matplotlip.pyplot", "plt"],
+    	];
+
+    	const completions: vscode.CompletionItem[] = [];
+
+    	// NE RABOTAYET
+    	imports.forEach(([name, alias]) => {
+        	const comp = new vscode.CompletionItem(`import`);
+        	comp.insertText = `import ${name} as ${alias}`;
+        	completions.push(comp);
+    	});
+
+		const commandCompletion = new vscode.CompletionItem("new");
+		commandCompletion.kind = vscode.CompletionItemKind.Keyword;
+		commandCompletion.insertText = "new ";
+		commandCompletion.command = {
+			command: "editor.action.triggerSuggest",
+			title: "Re-trigger completions...",
+		};
+
+		return [commandCompletion, ...completions];
+    },
+	});
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('code-finder.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from CodeFinder!');
+	let disposable = vscode.commands.registerCommand('code-finder.codefinder', () => {
+		context.subscriptions.push(provider);
 	});
 
 	context.subscriptions.push(disposable);

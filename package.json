@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:code-finder.helloWorld"
+		"onCommand:code-finder.codefinder"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "code-finder.helloWorld",
-				"title": "Hello World"
+				"command": "code-finder.codefinder",
+				"title": "CodeFinder"
 			}
 		]
 	},
