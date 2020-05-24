@@ -19,8 +19,9 @@ class ContentBlock {
 		let result = `## ${this.title}
 * * *
 *[${this.url}] (${this.url})*
-* * *
-${this.content}`;
+
+>${this.content}
+<br/><br/>`;
 
 		return converter.makeHtml(result);
 	}
