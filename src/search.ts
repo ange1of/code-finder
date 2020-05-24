@@ -1,4 +1,6 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
+let showdown = require('showdown');
+
 
 class ContentBlock {
 	title: string;
@@ -11,14 +13,16 @@ class ContentBlock {
 		this.url = url;
 	}
 
-	generateMarkdown(): string {
-		return `<h1>${this.title}</h1>
-				<hr/>
-				<i>${this.url}</i>
-				<hr/>
-				${this.content}
-				<hr/>
-				<br/>`;
+	generateHtml(): string {
+		let converter = new showdown.Converter();
+
+		let result = `## ${this.title}
+* * *
+*[${this.url}] (${this.url})*
+* * *
+${this.content}`;
+
+		return converter.makeHtml(result);
 	}
 
 }
@@ -42,7 +46,7 @@ export const Search = vscode.commands.registerCommand(
 
 			let content: string = '';
 
-			getContent(query).forEach(contentBlock => content += contentBlock.generateMarkdown());
+			getContent(query).forEach(contentBlock => content += contentBlock.generateHtml());
 			panel.webview.html = content;
     	});
 	}
