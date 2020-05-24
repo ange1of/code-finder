@@ -8,12 +8,13 @@ END_POINT = "https://api.github.com/"
 SEARCH_REPOS_METHOD = "search/repositories"
 SEARCH_CODE_METHOD = "search/code"
 
+USERNAME = ""
+TOKEN = ""
+
 def get_request_json(url):
-    response = requests.get(url)
+    response = gh_session.get(url)
     if int(response.headers['X-Ratelimit-Remaining']) < 2:
-        print(response.headers['X-Ratelimit-Reset'])
         diff = int(response.headers['X-Ratelimit-Reset']) - int(time.time())
-        print(diff)
         time.sleep(diff)
     return response.json()
 
@@ -46,19 +47,18 @@ def get_construction_urls_from_repo(construction, language, repo):
             urls_list.append(code['git_url'])
     return urls_list
 
-def get_code_by_url(url):
+def get_code_by_url(url, construction):
     lines = get_request_json(url)
     if lines['encoding'] == 'base64':
-        return base64.b64decode(lines['content'])
+        lines_decoded = str(base64.b64decode(lines['content'])).split("\\n")
+        lines_with_construction = list(filter(lambda x: construction in x, lines_decoded))
+        return list(map(lambda x: x.strip(), lines_with_construction))
     else:
-        return "???????????????"
+        return []
 
 def save_constructions(language, constructions):
-    {k: v for k, v in sorted(constructions.items(), key=lambda item: item[1])}
-    print(language)
-    print(constructions)
-    # with open("DATABASE_AI_500GPU_%s.json" %(language), 'w') as outfile:
-    #     json.dump(constructions, outfile)
+    with open("DATABASE_AI_500GPU_%s.json" %(language), 'w') as outfile:
+        json.dump(sorted(constructions.items(), key=lambda x: x[1], reverse=True), outfile)
 
 
 constructions_to_fill = {
@@ -73,6 +73,9 @@ for language, construction in constructions_to_fill:
     else:
         mapped_constructions[language] = [construction]
 
+gh_session = requests.Session()
+gh_session.auth = (USERNAME, TOKEN)
+
 for language in mapped_constructions.keys():
     constructions = dict()
     repos = get_repos_by_language(language)
@@ -80,11 +83,11 @@ for language in mapped_constructions.keys():
         for repo in repos:
             urls = get_construction_urls_from_repo(construction, language, repo)
             for url in urls:
-                code = get_code_by_url(url) # TODO: get more valuable information from this string
-                if code in constructions:
-                    constructions[code] += 1
-                else:
-                    constructions[code] = 1
+                codes = get_code_by_url(url, construction)
+                for code in codes:
+                    if code in constructions:
+                        constructions[code] += 1
+                    else:
+                        constructions[code] = 1
     save_constructions(language, constructions)
 
-    
