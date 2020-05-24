@@ -53,8 +53,8 @@ export const Search = vscode.commands.registerCommand(
 );
 
 function getContent(query: string): Array<ContentBlock> {
-	return [
-		new ContentBlock('Issue #123', 'The amazing content', 'http://abc.def'),
-		new ContentBlock('Wiki page', 'The amazing content', 'http://omg.wtf')
-	];
+  return [
+    new ContentBlock("Issue #123", "The amazing content", "http://abc.def"),
+    new ContentBlock("Wiki page", "The amazing content", "http://omg.wtf"),
+  ];
 }
