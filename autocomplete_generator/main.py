@@ -27,7 +27,7 @@ def get_repos_by_language(language):
         return json.load(repos)
 
 def save_popular_repos_by_language(language):
-    query = "?q=language:%s&order=desc" %(language)
+    query = "?q=language:%s&order=desc&sort=stars" %(language)
     repos = get_request_json(END_POINT + SEARCH_REPOS_METHOD + query)
     repo_list = []
     if repos['total_count'] == 0 : return False
