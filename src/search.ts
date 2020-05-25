@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
+import { GithubSearch } from './github-search';
 let showdown = require('showdown');
-
 
 class ContentBlock {
 	title: string;
@@ -28,7 +28,9 @@ class ContentBlock {
 
 }
 
-export const Search = vscode.commands.registerCommand(
+export const Search = (context: vscode.ExtensionContext) => { 
+	
+	return vscode.commands.registerCommand(
 	"code-finder.search",
 	() => {
     vscode.window
@@ -46,16 +48,20 @@ export const Search = vscode.commands.registerCommand(
 			);
 
 			let content: string = '';
-
-			getContent(query).forEach(contentBlock => content += contentBlock.generateHtml());
+			getContent(query, context).then(result => result.forEach(contentBlock => content += contentBlock.generateHtml()));
 			panel.webview.html = content;
     	});
 	}
-);
+);};
 
-function getContent(query: string): Array<ContentBlock> {
-  return [
-    new ContentBlock("Issue #123", "The amazing content", "http://abc.def"),
-    new ContentBlock("Wiki page", "The amazing content", "http://omg.wtf"),
-  ];
+async function getContent(query: string, context: vscode.ExtensionContext): Promise<Array<ContentBlock>> {
+	return (await new GithubSearch(context.extensionPath).getSuggestions(query, 'python'))
+		.map(
+				suggestion => new ContentBlock('Code', suggestion, '')
+			);
+
+//   return [
+//     new ContentBlock("Issue #123", "The amazing content", "http://abc.def"),
+//     new ContentBlock("Wiki page", "The amazing content", "http://omg.wtf"),
+//   ];
 }
