@@ -17,11 +17,11 @@ class ContentBlock {
 		let converter = new showdown.Converter();
 
 		let result = `## ${this.title}
-* * *
 *[${this.url}] (${this.url})*
 
->${this.content}
-<br/><br/>`;
+\`${this.content}\`
+* * *
+`;
 
 		return converter.makeHtml(result);
 	}
