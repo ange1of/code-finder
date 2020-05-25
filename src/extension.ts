@@ -8,10 +8,6 @@ export function activate(context: vscode.ExtensionContext) {
   const autoCompleteProvider = createCompletionsProvider(context);
   context.subscriptions.push(autoCompleteProvider, Search);
   console.log("code-finder loaded 🚀");
-  githubSearch
-    .getSuggestions("import", "python")
-    .then((result) => console.log(result))
-    .catch(console.error);
 }
 
 export function deactivate() {}

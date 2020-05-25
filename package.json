@@ -29,7 +29,7 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
-		"publish": "cp generator/completions.json resources/completions.json && vsce publish"
+		"publish": "cp generator/completions_clean.json resources/completions.json && vsce publish"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
