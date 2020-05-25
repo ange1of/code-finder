@@ -9,6 +9,8 @@ export class GithubSearch {
   private TOKEN: string = "";
   private reposPath: string = "";
 
+  private CODE_URL: string = "https://raw.githubusercontent.com/"
+
   constructor(private extensionPath: string) {
     this.octokit = new Octokit({
       auth: this.TOKEN || null,
@@ -59,17 +61,22 @@ export class GithubSearch {
   ): Promise<string[]> {
     const repos = await this.getReposByLanguage(language);
     const constructions: string[] = [];
+    const constructionsSet: Set<string> = new Set<string>();
     for (const repo of repos) {
-      const codes = await this.getConstructionUrlsFromRepo(
+      const paths = await this.getCodePaths(
         construction,
         language,
         repo
-      ); //урлы конструкций
-      for (const contentURL of codes) {
-        const content = await this.getCodesFromUrl(contentURL);
-        const contentToSave = Buffer.from(content, "base64").toString("binary");
-        constructions.push(contentToSave);
+      );
+      for (const path of paths) {
+        const content = await this.getCodesFromUrl(this.CODE_URL + repo + "/master/" + path);
+        for (const code of content.split(String.fromCharCode(10)).filter(x => x.startsWith(construction))) { 
+          constructionsSet.add(code);
+        }
       }
+    }
+    for (const temp of constructionsSet) {
+      constructions.push(temp);
     }
     return constructions;
   }
@@ -97,7 +104,7 @@ export class GithubSearch {
     const repos = await this.octokit.search.repos({
       q: `language:${language}`,
       order: "desc",
-      per_page: 10,
+      per_page: 5,
     });
     console.log("repos search ok");
     const repoList: string[] = [];
@@ -114,7 +121,7 @@ export class GithubSearch {
     //fs.writeFileSync(`repos_${language}.json`, JSON.stringify(repos));
   }
 
-  private async getConstructionUrlsFromRepo(
+  private async getCodePaths(
     construction: string,
     language: string,
     repo: string
@@ -124,22 +131,18 @@ export class GithubSearch {
       q: `${construction} language:${language} repo:${repo}`,
     });
     console.log("code search ok");
-    const codeUrlsList: string[] = [];
+    const pathsList: string[] = [];
 
     for (const code of codes.data.items) {
-      codeUrlsList.push(code.git_url);
+      pathsList.push(code.path);
     }
-    return codeUrlsList;
+    return pathsList;
   }
 
   private async getCodesFromUrl(url: string): Promise<string> {
-    // let response = await fetch(url);
-    const response = await superagent
-      .get(url)
-      .accept("json")
-      .set("User-Agent", "ange1of/code-finder");
     console.log(url);
-    const json = (await response.body) as Record<string, unknown>;
-    return json["content"] as string;
+    return await superagent
+      .get(url)
+      .then(x => x.text);
   }
 }
