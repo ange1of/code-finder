@@ -60,7 +60,6 @@ export class GithubSearch {
     language: string
   ): Promise<string[]> {
     const repos = await this.getReposByLanguage(language);
-    const constructions: string[] = [];
     const constructionsSet: Set<string> = new Set<string>();
     for (const repo of repos) {
       const paths = await this.getCodePaths(
@@ -70,15 +69,10 @@ export class GithubSearch {
       );
       for (const path of paths) {
         const content = await this.getCodesFromUrl(this.CODE_URL + repo + "/master/" + path);
-        for (const code of content.split(String.fromCharCode(10)).filter(x => x.startsWith(construction))) { 
-          constructionsSet.add(code);
-        }
+        content.split(String.fromCharCode(10)).filter(x => x.startsWith(construction)).forEach(constructionsSet.add, constructionsSet);
       }
     }
-    for (const temp of constructionsSet) {
-      constructions.push(temp);
-    }
-    return constructions;
+    return [...constructionsSet];
   }
 
   private async getReposByLanguage(language: string): Promise<string[]> {
