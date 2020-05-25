@@ -1,13 +1,17 @@
 import vscode from "vscode";
 import { createCompletionsProvider } from "./autocomplete";
 import { Search } from "./search";
-//import { getSuggestions } from './github-search';
+import { GithubSearch } from "./github-search";
 
 export function activate(context: vscode.ExtensionContext) {
+  const githubSearch = new GithubSearch(context.extensionPath);
   const autoCompleteProvider = createCompletionsProvider(context);
   context.subscriptions.push(autoCompleteProvider, Search);
   console.log("code-finder loaded 🚀");
-  //getSuggestions("import", "python").then(result => console.log(result));
+  githubSearch
+    .getSuggestions("import", "python")
+    .then((result) => console.log(result))
+    .catch(console.error);
 }
 
 export function deactivate() {}
