@@ -46,6 +46,7 @@
 	},
 	"dependencies": {
 		"@octokit/rest": "^17.9.2",
+    "showdown": "^1.9.1",
 		"superagent": "^5.2.2"
 	}
 }
