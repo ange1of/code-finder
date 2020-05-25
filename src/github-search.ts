@@ -1,15 +1,15 @@
-import * as vscode from "vscode";
-import * as fs from "fs";
-import * as path from "path";
+import vscode from "vscode";
+import fs from "fs";
+import path from "path";
 import { Octokit } from "@octokit/rest";
-import * as superagent from "superagent";
+import superagent from "superagent";
 
 export class GithubSearch {
   private octokit: Octokit;
   private TOKEN: string = "";
   private reposPath: string = "";
 
-  private CODE_URL: string = "https://raw.githubusercontent.com/"
+  private CODE_URL: string = "https://raw.githubusercontent.com/";
 
   constructor(private extensionPath: string) {
     this.octokit = new Octokit({
@@ -62,14 +62,15 @@ export class GithubSearch {
     const repos = await this.getReposByLanguage(language);
     const constructionsSet: Set<string> = new Set<string>();
     for (const repo of repos) {
-      const paths = await this.getCodePaths(
-        construction,
-        language,
-        repo
-      );
+      const paths = await this.getCodePaths(construction, language, repo);
       for (const path of paths) {
-        const content = await this.getCodesFromUrl(this.CODE_URL + repo + "/master/" + path);
-        content.split(String.fromCharCode(10)).filter(x => x.startsWith(construction)).forEach(constructionsSet.add, constructionsSet);
+        const content = await this.getCodesFromUrl(
+          this.CODE_URL + repo + "/master/" + path
+        );
+        content
+          .split(String.fromCharCode(10))
+          .filter((x) => x.startsWith(construction))
+          .forEach(constructionsSet.add, constructionsSet);
       }
     }
     return [...constructionsSet];
@@ -135,8 +136,6 @@ export class GithubSearch {
 
   private async getCodesFromUrl(url: string): Promise<string> {
     console.log(url);
-    return await superagent
-      .get(url)
-      .then(x => x.text);
+    return await superagent.get(url).then((x) => x.text);
   }
 }
