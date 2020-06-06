@@ -25,7 +25,7 @@ jobs:
       with:
         run: npm test
     - name: Publish
-      if: success() matrix.os == 'ubuntu-latest'
+      if: success() && matrix.os == 'ubuntu-latest'
       run: npm run deploy
       env:
         VSCE_PAT: ${{ secrets.AZURE_KEY }}
