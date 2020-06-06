@@ -28,4 +28,4 @@ jobs:
       if: success() && matrix.os == 'ubuntu-latest'
       run: npm run publish
       env:
-        VSCE_PAT: ${{ secrets.AZURE_KEY }}
+        VSCE_PAT: $
