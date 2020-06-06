@@ -26,6 +26,6 @@ jobs:
         run: npm test
     - name: Publish
       if: success() && matrix.os == 'ubuntu-latest'
-      run: npm run publish
+      run: "node ./node_modules/.bin/vsce publish -p $VSCE_PAT"
       env:
-        VSCE_PAT: $
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}

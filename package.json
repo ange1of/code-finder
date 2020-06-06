@@ -27,13 +27,13 @@
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
+		"vscode:prepublish": "cp generator/completions_clean.json resources/completions.json && npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint src --ext ts",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
-		"publish": "cp generator/completions_clean.json resources/completions.json && vsce publish"
+		"publish": "vsce publish"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
