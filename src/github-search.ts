@@ -1,8 +1,8 @@
-import vscode from "vscode";
 import fs from "fs";
 import path from "path";
 import { Octokit } from "@octokit/rest";
 import superagent from "superagent";
+import { AutoCompleteSuggestion, SearchSuggestion } from "./suggestions";
 
 export class GithubSearch {
   private octokit: Octokit;
@@ -18,59 +18,44 @@ export class GithubSearch {
     });
   }
 
-  // type GithubRepo = {
-  //    fullName: string;
-  // } // { "fullName", "fdsm;kfn", "fmdf"}
+  async getAutocompletionSuggestions(construction: string, language: string) {
+    return (await this.getLocalConstructions(language))
+      .filter(x => x.startsWith(construction))
+      .map(x => new AutoCompleteSuggestion(x)); 
+  }
 
-  // type GithubFileCode = {
-  //   fileUrl: string;
-  //   codes: string[];
-  //   fileName: string;
-  // }
-
-  // type ReposForLanguage = {
-  //   repos: GithubRepo
-  // }
-
-  async getSuggestions(construction: string, language: string) {
-    this.reposPath = `repos_${language}.json`;
-    const constructions = (
-      await this.getLocalConstructions(language)
-    ).filter((x) => x.includes(construction));
-    if (!Array.isArray(constructions) || !constructions.length) {
-      return this.loadConstructions(construction, language);
-    } else {
-      return constructions;
-    }
+  async getSearchSuggestions(construction: string, language: string) {
+    return (await this.loadConstructions(construction, language))
+      .map(x => new SearchSuggestion(x[0], x[1]));
   }
 
   private async getLocalConstructions(language: string): Promise<string[]> {
-    if (fs.existsSync(path.resolve(this.extensionPath, `DB_KEK_${language}`))) {
-      const data = fs
-        .readFileSync(`DB_KEK_${language}`, { encoding: "utf-8" })
-        .toString();
-      return JSON.parse(data);
+    if (!fs.existsSync(path.resolve(this.extensionPath, `suggestions_${language}.json`))) {
+      return [];
     }
 
-    return [];
+    const data = fs
+      .readFileSync(`suggestions_${language}.json`, { encoding: "utf-8" })
+      .toString();
+    return JSON.parse(data);
   }
 
   private async loadConstructions(
     construction: string,
     language: string
-  ): Promise<string[]> {
+  ): Promise<[string, string][]> {
     const repos = await this.getReposByLanguage(language);
-    const constructionsSet: Set<string> = new Set<string>();
+    const constructionsSet: Set<[string, string]> = new Set<[string, string]>();
     for (const repo of repos) {
       const paths = await this.getCodePaths(construction, language, repo);
       for (const path of paths) {
         const content = await this.getCodesFromUrl(
-          this.CODE_URL + repo + "/master/" + path
+          this.CODE_URL + repo + "/master/" + path[0]
         );
         content
           .split(String.fromCharCode(10))
           .filter((x) => x.startsWith(construction))
-          .forEach(constructionsSet.add, constructionsSet);
+          .forEach(x => constructionsSet.add([x[0], path[1]]));
       }
     }
     return [...constructionsSet];
@@ -102,34 +87,24 @@ export class GithubSearch {
       per_page: 5,
     });
     console.log("repos search ok");
-    const repoList: string[] = [];
 
-    // for (const repo of repos.data.items) {
-    //   repoList.push(repo.full_name);
-    // }
-    // fs.writeFileSync(
-    //   path.resolve(this.extensionPath, this.reposPath),
-    //   JSON.stringify(repoList),
-    //   { encoding: "utf-8" }
-    // );
     return repos.data.items.map((x) => x.full_name);
-    //fs.writeFileSync(`repos_${language}.json`, JSON.stringify(repos));
   }
 
   private async getCodePaths(
     construction: string,
     language: string,
     repo: string
-  ): Promise<string[]> {
+  ): Promise<[string, string][]> {
     console.log("code search start");
     const codes = await this.octokit.search.code({
       q: `${construction} language:${language} repo:${repo}`,
     });
     console.log("code search ok");
-    const pathsList: string[] = [];
+    const pathsList: [string, string][] = [];
 
     for (const code of codes.data.items) {
-      pathsList.push(code.path);
+      pathsList.push([code.path, code.html_url]);
     }
     return pathsList;
   }

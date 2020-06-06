@@ -55,9 +55,9 @@ export const Search = (context: vscode.ExtensionContext) => {
 );};
 
 async function getContent(query: string, context: vscode.ExtensionContext): Promise<Array<ContentBlock>> {
-	return (await new GithubSearch(context.extensionPath).getSuggestions(query, 'python'))
+	return (await new GithubSearch(context.extensionPath).getAutocompletionSuggestions(query, 'python'))
 		.map(
-				suggestion => new ContentBlock('Code', suggestion, '')
+				suggestion => new ContentBlock('Code', suggestion.construction, '')
 			);
 
 //   return [
