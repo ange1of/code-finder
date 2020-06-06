@@ -3,7 +3,11 @@
 	"name": "code-finder",
 	"displayName": "CodeFinder",
 	"description": "",
-	"version": "0.0.3",
+	"version": "0.0.4",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:ange1of/code-finder.git"
+	},
 	"engines": {
 		"vscode": "^1.45.0"
 	},
