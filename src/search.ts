@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
+import fs from "fs";
+import path from "path";
 import { GithubSearch } from './github-search';
-let showdown = require('showdown');
+
+const showdown = require('showdown');
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 class ContentBlock {
 	title: string;
@@ -13,7 +18,7 @@ class ContentBlock {
 		this.url = url;
 	}
 
-	generateHtml(): string {
+	htmlRepresentation(): string {
 		let converter = new showdown.Converter();
 
 		let result = `## ${this.title}
@@ -47,21 +52,66 @@ export const Search = (context: vscode.ExtensionContext) => {
 				{} // Webview options. More on these later.
 			);
 
-			let content: string = '';
-			getContent(query, context).then(result => result.forEach(contentBlock => content += contentBlock.generateHtml()));
-			panel.webview.html = content;
+			try {
+				let webviewManager = new WebviewManager(context.extensionPath, panel.webview);
+				webviewManager.renderQuery(query);
+			}
+			catch (ex) {
+				panel.webview.html = `<h2>Unable to display results<h2>\n
+				<h3>${ex}</h3>`;
+			}
     	});
 	}
 );};
 
-async function getContent(query: string, context: vscode.ExtensionContext): Promise<Array<ContentBlock>> {
-	return (await new GithubSearch(context.extensionPath).getAutocompletionSuggestions(query, 'python'))
-		.map(
-				suggestion => new ContentBlock('Code', suggestion.construction, '')
-			);
+export class WebviewManager {
 
-//   return [
-//     new ContentBlock("Issue #123", "The amazing content", "http://abc.def"),
-//     new ContentBlock("Wiki page", "The amazing content", "http://omg.wtf"),
-//   ];
+	private filePath: string;
+	private dom: any;
+
+	constructor(private extensionPath: string, private webviewObject: vscode.Webview) {
+		this.filePath = path.resolve(this.extensionPath, 'static', 'index.html');
+		this.dom = new JSDOM(this.loadHtml());
+		this.updatePage();
+	}
+
+	public renderQuery(query: string) {
+		if (!query) { return; }
+
+		this.getContent(query)
+			.then(
+				contentBlockArray => {
+					contentBlockArray.map(
+						block => {}
+					);
+					this.updatePage();
+				}
+			);
+	}
+
+	private loadHtml(): string {
+		if (!fs.existsSync(this.filePath)) {
+			throw new Error('Main page loading failed');
+		}
+	
+		const data = fs
+			.readFileSync(this.filePath, { encoding: "utf-8" })
+			.toString();
+		return data;
+	}
+
+	private updatePage() {
+		this.webviewObject.html = this.dom.serialize();
+	}
+
+	private async getContent(query: string): Promise<Array<ContentBlock>> {
+		// return (await new GithubSearch(this.extensionPath).getAutocompletionSuggestions(query, 'python'))
+		// 	.map(
+		// 			suggestion => new ContentBlock('Code', suggestion.construction, '')
+		// 		);
+		return [
+			new ContentBlock('Lol', 'kekes memes', 'http://lolkek.ru'), 
+			new ContentBlock('Lol', 'kekes memes', 'http://lolkek.ru')
+		];
+	}
 }
