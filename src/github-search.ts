@@ -25,8 +25,7 @@ export class GithubSearch {
   }
 
   async getSearchSuggestions(construction: string, language: string) {
-    return (await this.loadConstructions(construction, language))
-      .map(x => new SearchSuggestion(x[0], x[1]));
+    return (await this.loadConstructions(construction, language));
   }
 
   private async getLocalConstructions(language: string): Promise<string[]> {
@@ -43,20 +42,12 @@ export class GithubSearch {
   private async loadConstructions(
     construction: string,
     language: string
-  ): Promise<[string, string][]> {
+  ): Promise<SearchSuggestion[]> {
     const repos = await this.getReposByLanguage(language);
-    const constructionsSet: Set<[string, string]> = new Set<[string, string]>();
+    const constructionsSet: Set<SearchSuggestion> = new Set<SearchSuggestion>();
     for (const repo of repos) {
-      const paths = await this.getCodePaths(construction, language, repo);
-      for (const path of paths) {
-        const content = await this.getCodesFromUrl(
-          this.CODE_URL + repo + "/master/" + path[0]
-        );
-        content
-          .split(String.fromCharCode(10))
-          .filter((x) => x.startsWith(construction))
-          .forEach(x => constructionsSet.add([x[0], path[1]]));
-      }
+      (await this.getCodeSuggestionsFromRepo(construction, language, repo))
+        .forEach(x => constructionsSet.add(x));
     }
     return [...constructionsSet];
   }
@@ -91,20 +82,32 @@ export class GithubSearch {
     return repos.data.items.map((x) => x.full_name);
   }
 
-  private async getCodePaths(
+  private async getCodeSuggestionsFromRepo(
     construction: string,
     language: string,
     repo: string
-  ): Promise<[string, string][]> {
+  ): Promise<SearchSuggestion[]> {
     console.log("code search start");
     const codes = await this.octokit.search.code({
       q: `${construction} language:${language} repo:${repo}`,
     });
     console.log("code search ok");
-    const pathsList: [string, string][] = [];
+    const pathsList: SearchSuggestion[] = [];
 
     for (const code of codes.data.items) {
-      pathsList.push([code.path, code.html_url]);
+      (await this.getCodesFromUrl(this.CODE_URL + repo + "/master/" + code.path))
+        .split(String.fromCharCode(10))
+        .filter(x => x.startsWith(construction))
+        .forEach(x => pathsList.push(
+          new SearchSuggestion(
+            x,
+            code.name,
+            code.html_url,
+            code.repository.description,
+            code.repository.full_name,
+            code.repository.html_url
+          )
+        ));
     }
     return pathsList;
   }

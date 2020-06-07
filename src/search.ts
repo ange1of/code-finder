@@ -117,13 +117,9 @@ export class WebviewManager {
 	}
 
 	private async getContent(query: string): Promise<Array<ContentBlock>> {
-		// return (await new GithubSearch(this.extensionPath).getAutocompletionSuggestions(query, 'python'))
-		// 	.map(
-		// 			suggestion => new ContentBlock('Code', suggestion.construction, '')
-		// 		);
-		return [
-			new ContentBlock('Lol', 'kekes memes\nimport numpy as np\n vot eto viuha', 'http://lolkek.ru'), 
-			new ContentBlock('Lol', 'kekes memes', 'http://lolkek.ru')
-		];
+		return (await new GithubSearch(this.extensionPath).getAutocompletionSuggestions(query, 'python'))
+			.map(
+					suggestion => new ContentBlock('Code', suggestion.construction, '')
+				);
 	}
 }

@@ -10,11 +10,26 @@ export class AutoCompleteSuggestion {
 
 export class SearchSuggestion {
     construction: string;
-    url: string;
+    fileName: string;
+    fileUrl: string;
+    repoDescription: string;
+    repoName: string;
+    repoUrl: string;
 
-    constructor(construction: string, url: string) {
+    constructor(
+        construction: string, 
+        fileName: string,
+        fileUrl: string,
+        repoDescription: string,
+        repoName: string,
+        repoUrl: string
+    ) {
         this.construction = construction;
-        this.url = url;
+        this.fileName = fileName;
+        this.fileUrl = fileUrl;
+        this.repoDescription = repoDescription;
+        this.repoName = repoName;
+        this.repoUrl = repoUrl;
     }
 
 }
