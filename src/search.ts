@@ -32,6 +32,7 @@ export const Search = (context: vscode.ExtensionContext) => {
 
 			try {
 				let webviewManager = new WebviewManager(context.extensionPath, panel.webview);
+				panel.webview.html = "<h1>Loading...</h1>";
 				webviewManager.renderQuery(query);
 			}
 			catch (ex) {
@@ -77,8 +78,7 @@ export class WebviewManager {
 		return `
 <div class="result-block">
 	<div class="block-header">
-		<h3>${block.fileName}</h3>
-		<p><a href=${block.fileUrl}>${block.fileUrl}</a></p>
+		<h3><a href=${block.fileUrl}>${block.fileName}</a></h3>
 	</div>
 	<div class="info">
 		<p>Repository: <a href="${block.repoUrl}">${block.repoName}</a></p>
@@ -109,28 +109,33 @@ export class WebviewManager {
 	}
 
 	private async getContent(query: string): Promise<Array<SearchSuggestion>> {
-		// return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, 'python'))
+		try {
+			return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, 'python'));
+		} catch (err) {
+			vscode.window.showErrorMessage(err.toString());
+			return [];
+		}
 
-		return [
-			new SearchSuggestion(
-				'import numpy a np\nlolkek cheburek\n123',
-				'test_file.py',
-				'http://lolkek.ru/test_repo/test_file',
-				`Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo 
-				Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo Awesome 
-				repo Awesome repo Awesome repo Awesome repo`,
-				'test-repo',
-				'http://lolkek.ru/test_repo'
-			),
-			new SearchSuggestion(
-				'abc',
-				'a.py',
-				'http://lolkek.ru/test_repo/test_file',
-				`VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-				VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV`,
-				'test-repo',
-				'http://lolkek.ru/test_repo'
-			),
-		];
+		// return [
+		// 	new SearchSuggestion(
+		// 		'import numpy a np\nlolkek cheburek\n123',
+		// 		'test_file.py',
+		// 		'http://lolkek.ru/test_repo/test_file',
+		// 		`Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo 
+		// 		Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo Awesome 
+		// 		repo Awesome repo Awesome repo Awesome repo`,
+		// 		'test-repo',
+		// 		'http://lolkek.ru/test_repo'
+		// 	),
+		// 	new SearchSuggestion(
+		// 		'abc',
+		// 		'a.py',
+		// 		'http://lolkek.ru/test_repo/test_file',
+		// 		`VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+		// 		VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV`,
+		// 		'test-repo',
+		// 		'http://lolkek.ru/test_repo'
+		// 	),
+		// ];
 	}
 }

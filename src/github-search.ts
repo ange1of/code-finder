@@ -7,7 +7,7 @@ import { AutoCompleteSuggestion, SearchSuggestion } from "./suggestions";
 export class GithubSearch {
   private octokit: Octokit;
   private TOKEN: string = "";
-  private reposPath: string = "";
+  private reposPath: string = "resources/repos_python.json";
 
   private CODE_URL: string = "https://raw.githubusercontent.com/";
 
@@ -21,11 +21,11 @@ export class GithubSearch {
   async getAutocompletionSuggestions(construction: string, language: string) {
     return (await this.getLocalConstructions(language))
       .filter(x => x.startsWith(construction))
-      .map(x => new AutoCompleteSuggestion(x)); 
+      .map(x => new AutoCompleteSuggestion(x));
   }
 
-  async getSearchSuggestions(construction: string, language: string) {
-    return (await this.loadConstructions(construction, language));
+  async getSearchSuggestions(construction: string, language: string, count: number = 5) {
+    return (await this.loadConstructions(construction, language, count));
   }
 
   private async getLocalConstructions(language: string): Promise<string[]> {
@@ -41,13 +41,17 @@ export class GithubSearch {
 
   private async loadConstructions(
     construction: string,
-    language: string
+    language: string,
+    count: number
   ): Promise<SearchSuggestion[]> {
+    let remaining = count;
     const repos = await this.getReposByLanguage(language);
     const constructionsSet: Set<SearchSuggestion> = new Set<SearchSuggestion>();
     for (const repo of repos) {
-      (await this.getCodeSuggestionsFromRepo(construction, language, repo))
+      if (remaining <= 0) { break; }
+      (await this.getCodeSuggestionsFromRepo(construction, language, repo, remaining))
         .forEach(x => constructionsSet.add(x));
+      remaining = count - constructionsSet.size;
     }
     return [...constructionsSet];
   }
@@ -85,7 +89,8 @@ export class GithubSearch {
   private async getCodeSuggestionsFromRepo(
     construction: string,
     language: string,
-    repo: string
+    repo: string,
+    count: number
   ): Promise<SearchSuggestion[]> {
     console.log("code search start");
     const codes = await this.octokit.search.code({

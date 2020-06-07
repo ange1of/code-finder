@@ -13,7 +13,7 @@ const loadCompletions = (extensionPath: string) => {
 
 export const createCompletionsProvider = (context: vscode.ExtensionContext) => {
   const completionsFromFile = loadCompletions(context.extensionPath);
-  console.log("Loaded completions: " + completionsFromFile);
+  console.log("Loaded completions: " + completionsFromFile.length);
   return vscode.languages.registerCompletionItemProvider("plaintext", {
     provideCompletionItems(
       document: vscode.TextDocument,
