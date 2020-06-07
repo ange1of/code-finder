@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Octokit } from "@octokit/rest";
 import superagent from "superagent";
-import { AutoCompleteSuggestion, SearchSuggestion } from "./suggestions";
+import { AutoCompleteSuggestion, SearchSuggestion, IssueSuggestion } from "./suggestions";
 
 export class GithubSearch {
   private octokit: Octokit;
@@ -24,6 +24,29 @@ export class GithubSearch {
 
   async getSearchSuggestions(construction: string, language: string, count: number = 5): Promise<SearchSuggestion[]> {
     return (await this.loadConstructions(construction, language, count));
+  }
+
+  async getIssuesSuggestions(construction: string, language: string): Promise<IssueSuggestion[]> {
+    return (await this.octokit.search.issuesAndPullRequests({
+      q: `${construction} language:${language}`,
+      sort: "reactions-+1",
+      order: "asc"
+    }))
+      .data
+      .items
+      .map(x => new IssueSuggestion(
+        x.html_url,
+        x.repository_url,
+        x.title,
+        x.state,
+        x.created_at,
+        x.updated_at,
+        x.closed_at,
+        x.body,
+        x.user.login,
+        x.user.html_url,
+        x.comments
+      ));
   }
 
   private getLocalConstructions(language: string): string[] {
