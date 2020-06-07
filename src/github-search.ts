@@ -17,24 +17,23 @@ export class GithubSearch {
     });
   }
 
-  async getAutocompletionSuggestions(construction: string, language: string) {
-    return (await this.getLocalConstructions(language))
-      .filter(x => x.startsWith(construction))
+  getAutocompletionSuggestions(construction: string, language: string): AutoCompleteSuggestion[] {
+    return this.getLocalConstructions(language)
       .map(x => new AutoCompleteSuggestion(x));
   }
 
-  async getSearchSuggestions(construction: string, language: string, count: number = 5) {
+  async getSearchSuggestions(construction: string, language: string, count: number = 5): Promise<SearchSuggestion[]> {
     return (await this.loadConstructions(construction, language, count));
   }
 
-  private async getLocalConstructions(language: string): Promise<string[]> {
-    const suggestionsFilename =  `resources/completions/completions_${language}.json`;
-    if (!fs.existsSync(path.resolve(this.extensionPath, `resources/suggestions_${language}.json`))) {
+  private getLocalConstructions(language: string): string[] {
+    const suggestionsFilename = this.extensionPath + `resources/completions/completions_${language}.json`;
+    if (!fs.existsSync(path.resolve(this.extensionPath, suggestionsFilename))) {
       return [];
     }
 
     const data = fs
-      .readFileSync(`suggestions_${language}.json`, { encoding: "utf-8" })
+      .readFileSync(suggestionsFilename, { encoding: "utf-8" })
       .toString();
     return JSON.parse(data);
   }
@@ -57,7 +56,7 @@ export class GithubSearch {
   }
 
   private async getReposByLanguage(language: string): Promise<string[]> {
-    const repoFilename = `resources/repos/repos_${language}.json`;
+    const repoFilename = this.extensionPath + `resources/repos/repos_${language}.json`;
     const filename = path.resolve(this.extensionPath, repoFilename);
 
     if (!fs.existsSync(filename)) {

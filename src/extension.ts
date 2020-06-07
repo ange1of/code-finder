@@ -5,7 +5,7 @@ import { GithubSearch } from "./github-search";
 
 export function activate(context: vscode.ExtensionContext) {
   const githubSearch = new GithubSearch(context.extensionPath);
-  const autoCompleteProvider = createCompletionsProvider(context);
+  const autoCompleteProvider = createCompletionsProvider(context, githubSearch);
   context.subscriptions.push(autoCompleteProvider, Search(context));
   console.log("code-finder loaded 🚀");
 }

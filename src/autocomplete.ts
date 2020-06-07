@@ -1,18 +1,8 @@
-import fs from "fs";
-import path from "path";
 import vscode from "vscode";
+import { GithubSearch } from "./github-search";
 
-const loadCompletions = (extensionPath: string) => {
-  // Probably super ineffective code
-  const completionsRaw = fs.readFileSync(
-    path.resolve(extensionPath, "resources", "completions.json"),
-    { encoding: "utf-8" }
-  );
-  return JSON.parse(completionsRaw.toString());
-};
-
-export const createCompletionsProvider = (context: vscode.ExtensionContext) => {
-  const completionsFromFile = loadCompletions(context.extensionPath);
+export const createCompletionsProvider = (context: vscode.ExtensionContext, search: GithubSearch) => {
+  const completionsFromFile = search.getAutocompletionSuggestions("", "Python");
   console.log("Loaded completions: " + completionsFromFile.length);
   return vscode.languages.registerCompletionItemProvider("plaintext", {
     provideCompletionItems(
@@ -22,7 +12,7 @@ export const createCompletionsProvider = (context: vscode.ExtensionContext) => {
       context: vscode.CompletionContext
     ) {
       return completionsFromFile.map(
-        (x: string) => new vscode.CompletionItem(x)
+        x => new vscode.CompletionItem(x.construction)
       );
     },
   });
