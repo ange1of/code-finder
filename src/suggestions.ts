@@ -33,3 +33,23 @@ export class SearchSuggestion {
     }
 
 }
+
+export class IssueSuggestion {
+    constructor(
+        public issueUrl: string,
+        public repoUrl: string,
+        public title: string,
+        public state: string,
+        public createdAt: string,
+        public updatedAt: string,
+        public closedAt: string | null,
+        public body: string,
+        public userLogin: string,
+        public userUrl: string,
+        public commentsCount: number
+    ) {
+        this.createdAt = (new Date(createdAt)).toDateString();
+        this.updatedAt = (new Date(updatedAt)).toDateString();
+        this.closedAt = closedAt ? (new Date(closedAt)).toDateString() : 'Not closed';
+    }
+}
