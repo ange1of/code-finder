@@ -7,15 +7,15 @@ import { SearchSuggestion } from './suggestions';
 const showdown = require('showdown');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+const editor = vscode.window.activeTextEditor;
 
-export const Search = (context: vscode.ExtensionContext) => { 
-	
+export const Search = (context: vscode.ExtensionContext) => {
+
 	return vscode.commands.registerCommand(
-	"code-finder.search",
-	() => {
-    vscode.window
-    	.showInputBox({ prompt: "Enter query" })
-    	.then((query) => {
+		"code-finder.search",
+		() => {
+			const query = editor?.document.getText(editor.selection);
+			console.info(`Query: ${query}`);
 
 			if (!query) {
 				return;
@@ -29,7 +29,7 @@ export const Search = (context: vscode.ExtensionContext) => {
 					localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'static'))]
 				} // Webview options. More on these later.
 			);
-			
+
 			try {
 				let webviewManager = new WebviewManager(context.extensionPath, panel.webview);
 				webviewManager.renderQuery(query);
@@ -38,9 +38,9 @@ export const Search = (context: vscode.ExtensionContext) => {
 				panel.webview.html = `<h2>Unable to display results<h2>\n
 				<h3>${ex}</h3>`;
 			}
-    	});
-	}
-);};
+		}
+	);
+};
 
 export class WebviewManager {
 
@@ -55,7 +55,7 @@ export class WebviewManager {
 
 	public renderQuery(query: string) {
 		if (!query) { return; }
-		
+
 		this.getContent(query)
 			.then(
 				contentBlockArray => {
@@ -94,7 +94,7 @@ export class WebviewManager {
 		if (!fs.existsSync(this.filePath)) {
 			throw new Error('Main page loading failed');
 		}
-		
+
 		const stylePath = vscode.Uri.file(path.join(this.extensionPath, 'static', 'style.css'));
 		const styleSrc = this.webviewObject.asWebviewUri(stylePath);
 
@@ -115,24 +115,24 @@ export class WebviewManager {
 
 		return [
 			new SearchSuggestion(
-				'import numpy a np\nlolkek cheburek\n123', 
-				'test_file.py', 
+				'import numpy a np\nlolkek cheburek\n123',
+				'test_file.py',
 				'http://lolkek.ru/test_repo/test_file',
 				`Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo 
 				Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo Awesome 
 				repo Awesome repo Awesome repo Awesome repo`,
 				'test-repo',
 				'http://lolkek.ru/test_repo'
-			), 
+			),
 			new SearchSuggestion(
-				'abc', 
-				'a.py', 
+				'abc',
+				'a.py',
 				'http://lolkek.ru/test_repo/test_file',
 				`VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 				VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV`,
 				'test-repo',
 				'http://lolkek.ru/test_repo'
-			), 
+			),
 		];
 	}
 }

@@ -22,9 +22,15 @@
 		"commands": [
 			{
 				"command": "code-finder.search",
-				"title": "CodeFinder: Search"
+				"title": "Search on GitHub"
 			}
-		]
+		],
+		"menus": {
+			"editor/context": [{
+				"command": "code-finder.search",
+				"when": "editorHasSelection"
+			}]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "cp generator/completions_clean.json resources/completions.json && npm run compile",
