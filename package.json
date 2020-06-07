@@ -23,13 +23,23 @@
 			{
 				"command": "code-finder.search",
 				"title": "Search on GitHub"
+			},
+			{
+				"command": "code-finder.searchIssues",
+				"title": "Search Issues on GitHub"
 			}
 		],
 		"menus": {
-			"editor/context": [{
-				"command": "code-finder.search",
-				"when": "editorHasSelection"
-			}]
+			"editor/context": [
+				{
+					"command": "code-finder.search",
+					"when": "editorHasSelection"
+				},
+				{
+					"command": "code-finder.searchIssues",
+					"when": "editorHasSelection"
+				}
+			]
 		}
 	},
 	"scripts": {
