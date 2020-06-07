@@ -33,7 +33,7 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "cp generator/completions_clean.json resources/completions.json && npm run compile",
+		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint src --ext ts",
 		"watch": "tsc -watch -p ./",
