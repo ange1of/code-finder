@@ -7,7 +7,6 @@ import { AutoCompleteSuggestion, SearchSuggestion } from "./suggestions";
 export class GithubSearch {
   private octokit: Octokit;
   private TOKEN: string = "";
-  private reposPath: string = "resources/repos_python.json";
 
   private CODE_URL: string = "https://raw.githubusercontent.com/";
 
@@ -29,7 +28,8 @@ export class GithubSearch {
   }
 
   private async getLocalConstructions(language: string): Promise<string[]> {
-    if (!fs.existsSync(path.resolve(this.extensionPath, `suggestions_${language}.json`))) {
+    const suggestionsFilename =  `resources/completions/completions_${language}.json`;
+    if (!fs.existsSync(path.resolve(this.extensionPath, `resources/suggestions_${language}.json`))) {
       return [];
     }
 
@@ -57,12 +57,13 @@ export class GithubSearch {
   }
 
   private async getReposByLanguage(language: string): Promise<string[]> {
-    const filename = path.resolve(this.extensionPath, this.reposPath);
+    const repoFilename = `resources/repos/repos_${language}.json`;
+    const filename = path.resolve(this.extensionPath, repoFilename);
 
     if (!fs.existsSync(filename)) {
       const repos = await this.savePopularReposByLanguage(language);
       fs.writeFileSync(
-        path.resolve(this.extensionPath, this.reposPath),
+        path.resolve(this.extensionPath, repoFilename),
         JSON.stringify(repos),
         { encoding: "utf-8" }
       );
