@@ -21,12 +21,10 @@ class ContentBlock {
 	htmlRepresentation(): string {
 		let converter = new showdown.Converter();
 
-		let result = `## ${this.title}
-*[${this.url}] (${this.url})*
-
-\`${this.content}\`
-* * *
-`;
+		let result = `<div class="result-block">
+		<h3>${this.title}</h3>
+<p>Source: <a href="${this.url}">${this.url}</a></p>
+<pre><div class="code">${this.content}</div></pre></div>`;
 
 		return converter.makeHtml(result);
 	}
@@ -41,6 +39,7 @@ export const Search = (context: vscode.ExtensionContext) => {
     vscode.window
     	.showInputBox({ prompt: "Enter query" })
     	.then((query) => {
+
 			if (!query) {
 				return;
 			}
@@ -49,9 +48,11 @@ export const Search = (context: vscode.ExtensionContext) => {
 				'searchResults', // Identifies the type of the webview. Used internally
 				'Search Results', // Title of the panel displayed to the user
 				vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-				{} // Webview options. More on these later.
+				{
+					localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'static'))]
+				} // Webview options. More on these later.
 			);
-
+			
 			try {
 				let webviewManager = new WebviewManager(context.extensionPath, panel.webview);
 				webviewManager.renderQuery(query);
@@ -77,12 +78,18 @@ export class WebviewManager {
 
 	public renderQuery(query: string) {
 		if (!query) { return; }
-
+		
 		this.getContent(query)
 			.then(
 				contentBlockArray => {
+					let document = this.dom.window.document;
+					document.querySelector('#query > div').textContent += query;
+					this.updatePage();
+
 					contentBlockArray.map(
-						block => {}
+						block => {
+							document.querySelector('#main-content').innerHTML += block.htmlRepresentation();
+						}
 					);
 					this.updatePage();
 				}
@@ -93,10 +100,15 @@ export class WebviewManager {
 		if (!fs.existsSync(this.filePath)) {
 			throw new Error('Main page loading failed');
 		}
-	
-		const data = fs
+		
+		const stylePath = vscode.Uri.file(path.join(this.extensionPath, 'static', 'style.css'));
+		const styleSrc = this.webviewObject.asWebviewUri(stylePath);
+
+		let data: string = fs
 			.readFileSync(this.filePath, { encoding: "utf-8" })
-			.toString();
+			.toString()
+			.replace('{{styleSrc}}', styleSrc.toString());
+
 		return data;
 	}
 
@@ -110,7 +122,7 @@ export class WebviewManager {
 		// 			suggestion => new ContentBlock('Code', suggestion.construction, '')
 		// 		);
 		return [
-			new ContentBlock('Lol', 'kekes memes', 'http://lolkek.ru'), 
+			new ContentBlock('Lol', 'kekes memes\nimport numpy as np\n vot eto viuha', 'http://lolkek.ru'), 
 			new ContentBlock('Lol', 'kekes memes', 'http://lolkek.ru')
 		];
 	}
