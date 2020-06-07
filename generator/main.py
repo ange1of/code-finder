@@ -14,7 +14,14 @@ CODE_COUNT = 10000
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/{full_name}/master/{path}"
 USER_AGENT = "ange1of/code-finder v0.0.1"
 CONSTRUCTIONS = [
-    "import"
+    "import",
+    "np",
+    "requests",
+    "tf",
+    "pd",
+    "plt",
+    "django",
+    "Flask"
 ]
 
 COMPLETIONS_FILE_NAME = "resources/completions/completions_{language}.json"
@@ -23,7 +30,40 @@ REPOS_FILE_NAME = "resources/repos/repos_{language}.json"
 LANGUAGES = [
     "Python"
 ]
+BAN_WORDS = ["def", "#"]
 
+def remove_comments(data):
+    base = io.StringIO(data)
+    tokgen = tokenize.generate_tokens(base.readline)
+    prev_toktype = token.INDENT
+    first_line = None
+    last_lineno = -1
+    last_col = 0
+
+    clean_file = io.StringIO()
+
+    for toktype, ttext, (slineno, scol), (elineno, ecol), ltext in tokgen:
+        if slineno > last_lineno:
+            last_col = 0
+        if scol > last_col:
+            clean_file.write(" " * (scol - last_col))
+        if toktype == token.STRING and prev_toktype == token.INDENT:
+            # Docstring
+            # mod.write("#--")
+            pass
+        elif toktype == tokenize.COMMENT:
+            # Comment
+            # mod.write("##\n")
+            pass
+        else:
+            clean_file.write(ttext)
+        prev_toktype = toktype
+        last_col = ecol
+        last_lineno = elineno
+
+    value = clean_file.getvalue()
+    clean_file.close()
+    return value
 
 @sleep_and_retry
 # @on_exception(expo, RateLimitException, max_tries=8)
@@ -57,6 +97,10 @@ def generate_completeions(g):
                             tqdm.write(f"error: {e} {code.repository.full_name}/{code.path}")
                             continue
                             
+                    content = remove_comments(content)
+                    for line in content.splitlines():
+                        if not any([x in line for x in BAN_WORDS]) and line.strip():
+                            completions.add(line.strip())
                 print()
         except KeyboardInterrupt:
             print("Saving state")
