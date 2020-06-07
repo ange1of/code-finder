@@ -7,13 +7,13 @@ import { SearchSuggestion } from './suggestions';
 const showdown = require('showdown');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const editor = vscode.window.activeTextEditor;
 
 export const Search = (context: vscode.ExtensionContext) => {
 
 	return vscode.commands.registerCommand(
 		"code-finder.search",
 		() => {
+			const editor = vscode.window.activeTextEditor;
 			const query = editor?.document.getText(editor.selection);
 			console.info(`Query: ${query}`);
 
