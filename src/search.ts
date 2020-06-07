@@ -4,7 +4,6 @@ import path from "path";
 import { GithubSearch } from './github-search';
 import { SearchSuggestion } from './suggestions';
 
-const showdown = require('showdown');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 

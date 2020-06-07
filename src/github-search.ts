@@ -56,7 +56,7 @@ export class GithubSearch {
   }
 
   private async getReposByLanguage(language: string): Promise<string[]> {
-    const repoFilename = this.extensionPath + `resources/repos/repos_${language}.json`;
+    const repoFilename = path.join(this.extensionPath, 'resources', 'repos', `repos_${language}.json`);
     const filename = path.resolve(this.extensionPath, repoFilename);
 
     if (!fs.existsSync(filename)) {
