@@ -20,7 +20,6 @@ header {
     display: flex;
     justify-content: space-between;
     width: 80%;
-    display: flex;
     align-items: center;
 }
 
@@ -36,7 +35,17 @@ hr {
     width: 80%;
 }
 
+p {
+    display: block;
+}
+
+pre {
+    height: fit-content;
+    margin: 0;
+}
+
 .result-block {
+    font-size: 1.2em;
     box-sizing: border-box;
     font-weight: normal;
     border: 1px solid var(--vscode-editor-foreground);
@@ -47,9 +56,6 @@ hr {
     padding: 15px;
     margin: 5px;
     width: 80%;
-
-    
-
     background-color: rgb(35,35,40);
 }
 
@@ -64,8 +70,23 @@ a:hover {
 .code {
     margin: 5px auto;
     padding: 5px;
-    width:90%;
+    width:95%;
     border: 0.5px solid rgb(200, 200, 210);
     border-radius: 5px;
     background-color: rgb(50, 50, 60);
+}
+
+.info {
+    word-break: break-word;
+    padding: 0;
+}
+
+.info > p {
+    margin: 5px 0 0 0;
+}
+
+.block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

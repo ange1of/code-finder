@@ -2,34 +2,11 @@ import * as vscode from 'vscode';
 import fs from "fs";
 import path from "path";
 import { GithubSearch } from './github-search';
+import { SearchSuggestion } from './suggestions';
 
 const showdown = require('showdown');
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-
-class ContentBlock {
-	title: string;
-	content: string;
-	url: string;
-
-	constructor(title: string, content: string, url:string) {
-		this.title = title;
-		this.content = content;
-		this.url = url;
-	}
-
-	htmlRepresentation(): string {
-		let converter = new showdown.Converter();
-
-		let result = `<div class="result-block">
-		<h3>${this.title}</h3>
-<p>Source: <a href="${this.url}">${this.url}</a></p>
-<pre><div class="code">${this.content}</div></pre></div>`;
-
-		return converter.makeHtml(result);
-	}
-
-}
 
 export const Search = (context: vscode.ExtensionContext) => { 
 	
@@ -88,12 +65,29 @@ export class WebviewManager {
 
 					contentBlockArray.map(
 						block => {
-							document.querySelector('#main-content').innerHTML += block.htmlRepresentation();
+							document.querySelector('#main-content').innerHTML += this.renderBlock(block);
 						}
 					);
 					this.updatePage();
 				}
 			);
+	}
+
+	private renderBlock(block: SearchSuggestion) {
+		return `
+<div class="result-block">
+	<div class="block-header">
+		<h3>${block.fileName}</h3>
+		<p><a href=${block.fileUrl}>${block.fileUrl}</a></p>
+	</div>
+	<div class="info">
+		<p>Repository: <a href="${block.repoUrl}">${block.repoName}</a></p>
+		<p>${block.repoDescription}</p>
+	</div>
+	<pre>
+		<div class="code">${block.construction}</div>
+	</pre>
+</div>`;
 	}
 
 	private loadHtml(): string {
@@ -116,10 +110,29 @@ export class WebviewManager {
 		this.webviewObject.html = this.dom.serialize();
 	}
 
-	private async getContent(query: string): Promise<Array<ContentBlock>> {
-		return (await new GithubSearch(this.extensionPath).getAutocompletionSuggestions(query, 'python'))
-			.map(
-					suggestion => new ContentBlock('Code', suggestion.construction, '')
-				);
+	private async getContent(query: string): Promise<Array<SearchSuggestion>> {
+		// return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, 'python'))
+
+		return [
+			new SearchSuggestion(
+				'import numpy a np\nlolkek cheburek\n123', 
+				'test_file.py', 
+				'http://lolkek.ru/test_repo/test_file',
+				`Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo 
+				Awesome repo Awesome repo Awesome repo Awesome repo Awesome repo Awesome 
+				repo Awesome repo Awesome repo Awesome repo`,
+				'test-repo',
+				'http://lolkek.ru/test_repo'
+			), 
+			new SearchSuggestion(
+				'abc', 
+				'a.py', 
+				'http://lolkek.ru/test_repo/test_file',
+				`VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+				VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV`,
+				'test-repo',
+				'http://lolkek.ru/test_repo'
+			), 
+		];
 	}
 }
