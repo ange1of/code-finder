@@ -15,6 +15,7 @@ export const Search = (context: vscode.ExtensionContext) => {
 		() => {
 			const editor = vscode.window.activeTextEditor;
 			const query = editor?.document.getText(editor.selection);
+			const language = editor?.document.languageId;
 			console.info(`Query: ${query}`);
 
 			if (!query) {
@@ -32,8 +33,8 @@ export const Search = (context: vscode.ExtensionContext) => {
 
 			try {
 				let webviewManager = new WebviewManager(context.extensionPath, panel.webview);
-				panel.webview.html = "<h1>Loading...</h1>";
-				webviewManager.renderQuery(query);
+				panel.webview.html = '<h1 style="font-weight: lighter">Loading...</h1>';
+				webviewManager.renderQuery(query, language);
 			}
 			catch (ex) {
 				panel.webview.html = `<h2>Unable to display results<h2>\n
@@ -54,16 +55,22 @@ export class WebviewManager {
 		this.updatePage();
 	}
 
-	public renderQuery(query: string) {
+	public renderQuery(query: string, language: string | undefined) {
 		if (!query) { return; }
 
-		this.getContent(query)
+		language = language || 'python';
+
+		this.getContent(query, language)
 			.then(
 				contentBlockArray => {
 					let document = this.dom.window.document;
 					document.querySelector('#query > div').textContent += query;
 					this.updatePage();
-
+					
+					if (!contentBlockArray.length) {
+						document.querySelector('#main-content').innerHTML += '<h3>Nothing found :(</h3>';
+					}
+					
 					contentBlockArray.map(
 						block => {
 							document.querySelector('#main-content').innerHTML += this.renderBlock(block);
@@ -108,9 +115,9 @@ export class WebviewManager {
 		this.webviewObject.html = this.dom.serialize();
 	}
 
-	private async getContent(query: string): Promise<Array<SearchSuggestion>> {
+	private async getContent(query: string, language: string): Promise<Array<SearchSuggestion>> {
 		try {
-			return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, 'python'));
+			return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, language));
 		} catch (err) {
 			vscode.window.showErrorMessage(err.toString());
 			return [];
