@@ -71,8 +71,8 @@ a:hover {
     margin: 15px auto;
     padding: 5px;
     width:95%;
-    border: 0.5px solid rgb(200, 200, 210);
-    border-radius: 5px;
+    border-radius: 0;
+    border-left: 2px solid rgb(200, 200, 210);
     background-color: rgb(50, 50, 60);
 }
 
@@ -88,5 +88,21 @@ a:hover {
 .block-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+}
+
+.time-info {
+    padding: 0;
+    margin: 0;
+    font-size: 0.8em;
+}
+
+.time-info > p {
+    padding: 0;
+    margin: 0;
+}
+
+.issue-state {
+    font-weight: lighter;
+    color: rgb(190, 207, 255);
 }

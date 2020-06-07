@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs from "fs";
 import path from "path";
 import { GithubSearch } from './github-search';
-import { SearchSuggestion } from './suggestions';
+import { SearchSuggestion, IssueSuggestion } from './suggestions';
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -72,26 +72,12 @@ export class WebviewManager {
 					
 					contentBlockArray.map(
 						block => {
-							document.querySelector('#main-content').innerHTML += this.renderBlock(block);
+							document.querySelector('#main-content').innerHTML += block.renderBlock();
 						}
 					);
 					this.updatePage();
 				}
 			);
-	}
-
-	private renderBlock(block: SearchSuggestion) {
-		return `
-<div class="result-block">
-	<div class="block-header">
-		<h3><a href=${block.fileUrl}>${block.fileName}</a></h3>
-	</div>
-	<div class="info">
-		<p>Repository: <a href="${block.repoUrl}">${block.repoName}</a></p>
-		<p>${block.repoDescription}</p>
-	</div>
-	<pre><div class="code">${block.construction}</div></pre>
-</div>`;
 	}
 
 	private loadHtml(): string {
@@ -114,13 +100,29 @@ export class WebviewManager {
 		this.webviewObject.html = this.dom.serialize();
 	}
 
-	private async getContent(query: string, language: string): Promise<Array<SearchSuggestion>> {
-		try {
-			return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, language));
-		} catch (err) {
-			vscode.window.showErrorMessage(err.toString());
-			return [];
-		}
+	private async getContent(query: string, language: string): Promise<Array<SearchSuggestion | IssueSuggestion>> {
+		// try {
+		// 	return (await new GithubSearch(this.extensionPath).getSearchSuggestions(query, language));
+		// } catch (err) {
+		// 	vscode.window.showErrorMessage(err.toString());
+		// 	return [];
+		// }
+
+		return [
+			new IssueSuggestion(
+				"https://api.github.com/repos/batterseapower/pinyin-toolkit/issues/132",
+				"https://api.github.com/repos/batterseapower/pinyin-toolkit",
+				"Line Number Indexes Beyond 20 Not Displayed",
+				"open",
+				"2009-07-12T20:10:41Z",
+				"2009-07-19T09:23:43Z",
+				null,
+				"Awesome body Awesome body Awesome body Awesome body Awesome body",
+				"Nick3C",
+				"https://api.github.com/users/Nick3C",
+				15
+			)
+		];
 
 		// return [
 		// 	new SearchSuggestion(
