@@ -84,9 +84,7 @@ export class WebviewManager {
 		<p>Repository: <a href="${block.repoUrl}">${block.repoName}</a></p>
 		<p>${block.repoDescription}</p>
 	</div>
-	<pre>
-		<div class="code">${block.construction}</div>
-	</pre>
+	<pre><div class="code">${block.construction}</div></pre>
 </div>`;
 	}
 
