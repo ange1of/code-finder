@@ -21,7 +21,7 @@ COMPLETIONS_FILE_NAME = "resources/completions/completions_{language}.json"
 REPOS_FILE_NAME = "resources/repos/repos_{language}.json"
 
 LANGUAGES = [
-    "Python", "C", "C++", "C#", "F#", "Java", "Kotlin", "Scala", "Swift", "Javascript", "Haskell"
+    "Python"
 ]
 
 
