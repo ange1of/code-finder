@@ -2,10 +2,11 @@ import vscode from "vscode";
 import { GithubSearch } from "./github-search";
 
 export const createCompletionsProvider = (context: vscode.ExtensionContext, search: GithubSearch) => {
-  const language = vscode.window.activeTextEditor?.document.languageId || "python" ;
-  const completionsFromFile = search.getAutocompletionSuggestions("", language);
+  const editor = vscode.window.activeTextEditor;
+  const language = editor?.document.languageId || "python";
+  const completionsFromFile = search.getAutocompletionSuggestions(language);
   console.log("Loaded completions: " + completionsFromFile.length);
-  return vscode.languages.registerCompletionItemProvider("plaintext", {
+  return vscode.languages.registerCompletionItemProvider(language, {
     provideCompletionItems(
       document: vscode.TextDocument,
       position: vscode.Position,

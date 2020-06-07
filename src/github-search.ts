@@ -17,7 +17,7 @@ export class GithubSearch {
     });
   }
 
-  getAutocompletionSuggestions(construction: string, language: string): AutoCompleteSuggestion[] {
+  getAutocompletionSuggestions(language: string): AutoCompleteSuggestion[] {
     return this.getLocalConstructions(language)
       .map(x => new AutoCompleteSuggestion(x));
   }
@@ -50,7 +50,9 @@ export class GithubSearch {
   }
 
   private getLocalConstructions(language: string): string[] {
-    const suggestionsFilename = this.extensionPath + `resources/completions/completions_${language}.json`;
+    const repoFilename = path.join(this.extensionPath, 'resources', 'completions', `completions_${language}.json`);
+    const suggestionsFilename = path.resolve(this.extensionPath, repoFilename);
+    
     if (!fs.existsSync(path.resolve(this.extensionPath, suggestionsFilename))) {
       return [];
     }
