@@ -75,6 +75,7 @@ a:hover {
     border-left: 2px solid rgb(200, 200, 210);
     background-color: rgb(50, 50, 60);
     word-break: break-word;
+    overflow-x: scroll;
 }
 
 .info {
