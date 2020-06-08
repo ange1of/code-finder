@@ -127,10 +127,10 @@ export class GithubSearch {
     for (const code of codes.data.items) {
       (await this.getCodesFromUrl(this.CODE_URL + repo + "/master/" + code.path))
         .split(String.fromCharCode(10))
-        .filter(x => x.startsWith(construction))
+        .filter(x => x.includes(construction))
         .forEach(x => pathsList.push(
           new SearchSuggestion(
-            x,
+            x.trim(),
             code.name,
             code.html_url,
             code.repository.description,
